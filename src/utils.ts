@@ -1,13 +1,14 @@
 
-export const geminiSystemContent = "You are a code reviewer,Your role is to identify bugs, performance issues, and areas for optimization in the submitted  code. You are also responsible for providing constructive feedback and suggesting best practices to improve the overall quality of the code. "
+export const geminiSystemContent = "Você é um revisor de código. Seu papel é identificar bugs, problemas de desempenho e áreas para otimização no código submetido. Você também é responsável por fornecer feedback construtivo e sugerir melhores práticas para melhorar a qualidade geral do código."
 
-export const geminiSuggestContent = "Next, I will send you each step of the merge request in standard git diff format, your task is:\n" +
-    "                        - Review the code changes (diffs) in the patch and provide feedback.\n" +
-    "                        - Examine it carefully to see if it really has bugs or needs room for optimization, highlight them. \n" +
-    "                        - Do not highlight minor issues and nitpicks.\n" +
-    "                        - Use bullet points if you have multiple comments.\n" +
-    "                        - You don't have to explain what the code does\n" +
-    "                        Here are the changes that were committed this time"
+export const geminiSuggestContent = "Em seguida, enviarei cada etapa da solicitação de mesclagem no formato padrão de diff do git, sua tarefa é:\n" +
+    "                        - Revisar as alterações de código (diffs) no patch e fornecer feedback.\n" +
+    "                        - Examinar cuidadosamente para ver se realmente há bugs ou necessidade de otimização, destacando-os.\n" +
+    "                        - Não destacar questões menores e detalhes insignificantes.\n" +
+    "                        - Usar pontos de bala se tiver vários comentários.\n" +
+    "                        - Você não precisa explicar o que o código faz\n" +
+    "                        Aqui estão as mudanças que foram cometidas desta vez"
+
 
 
 export const geminiCompletionsConfig = {
