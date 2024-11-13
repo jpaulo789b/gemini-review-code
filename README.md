@@ -1,4 +1,4 @@
-# @jpaulo789b/gemini-review-code-br
+# @jpaulo789b/gemini-review-code-br-br
 
 [![npm version](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai.svg)](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,7 +7,7 @@
 
 ![](preview.png)
 
-`@jpaulo789b/gemini-review-code` It is a small tool used for code review in GitLab Merge Requests. It supports calling the GitLab API for private 
+`@jpaulo789b/gemini-review-code-br` It is a small tool used for code review in GitLab Merge Requests. It supports calling the GitLab API for private 
 deployment and uses the Gemini AI API to obtain review results. Please note that when using it, ensure compliance with company regulations. 😉
 
 
@@ -26,7 +26,7 @@ deployment and uses the Gemini AI API to obtain review results. Please note that
 ## Install
 
 ```sh
-npm i @hataiit9x/gemini-review-code
+npm i @jpaulo789b/gemini-review-code-br
 `````
 
 ## Use
@@ -34,7 +34,7 @@ npm i @hataiit9x/gemini-review-code
 ### Use via shell script
 
 ```shell
-Usage: gemini-review-code [options]
+Usage: gemini-review-code-br [options]
 Options:
   -g, --gitlab-api-url <string>       GitLab API URL (default: " https://gitlab.com/api/v4")
   -t, --gitlab-access-token <string>  GitLab Access Token
@@ -48,7 +48,7 @@ Options:
 Example:
 
 ```sh
-gemini-review-code -g https://gitlab.com/api/v4 -t glpat-xxxxxxx -a AIzaSyAYNxxxxxxx,AIzaSyAYNxxxxxxx -p 1 -c gpt-3.5-turbo 432288 -m 8
+gemini-review-code-br -g https://gitlab.com/api/v4 -t glpat-xxxxxxx -a AIzaSyAYNxxxxxxx,AIzaSyAYNxxxxxxx -p 1 -c gpt-3.5-turbo 432288 -m 8
 ```
 
 ### Use in CI
