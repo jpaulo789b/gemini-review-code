@@ -1,4 +1,4 @@
-# @hataiit9x/gemini-review-code
+# @jpaulo789b/gemini-review-code-br
 
 [![npm version](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai.svg)](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
