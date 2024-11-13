@@ -7,7 +7,7 @@
 
 ![](preview.png)
 
-`@hataiit9x/gemini-review-code` It is a small tool used for code review in GitLab Merge Requests. It supports calling the GitLab API for private 
+`@jpaulo789b/gemini-review-code` It is a small tool used for code review in GitLab Merge Requests. It supports calling the GitLab API for private 
 deployment and uses the Gemini AI API to obtain review results. Please note that when using it, ensure compliance with company regulations. 😉
 
 
