@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "bin": {
-    "gemini-review-code": "bin/index.js"
+    "gemini-review-code-br": "bin/index.js"
   },
   "scripts": {
     "start": "tsc --watch",
