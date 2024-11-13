@@ -63,8 +63,8 @@ Code Review:
   stage: merge-request  
   image: node:16
   script:
-    - npm i @hataiit9x/gemini-review-code -g
-    - gemini-review-code -t "$GITLAB_TOKEN" -a "$API_KEY" -c "$CUSTOM_MODELS" -p "$CI_MERGE_REQUEST_PROJECT_ID" -m "$CI_MERGE_REQUEST_IID"
+    - npm i @jpaulo789b/gemini-review-code-br -g
+    - gemini-review-code-br -t "$GITLAB_TOKEN" -a "$API_KEY" -p "$CI_MERGE_REQUEST_PROJECT_ID" -m "$CI_MERGE_REQUEST_IID"
   only:
     - merge_requests
   when: on_success
