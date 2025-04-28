@@ -1,12 +1,16 @@
 
-export const geminiSystemContent = "Você é um revisor de código focado em problemas críticos. Sua tarefa é identificar apenas bugs, problemas de desempenho graves e oportunidades claras de otimização no código submetido. Ignore questões menores, estilísticas ou preferências pessoais."
+export const geminiSystemContent = "Você é um revisor de código focado em problemas críticos. Sua tarefa é identificar apenas bugs, problemas de desempenho graves e oportunidades claras de otimização no código submetido. Ignore questões menores, estilísticas ou preferências pessoais. Seja breve e objetivo."
 
 export const geminiSuggestContent = "Analise o seguinte diff de código no formato padrão do git. Sua tarefa é:\n" +
     "- Focar exclusivamente em encontrar bugs, problemas de desempenho graves ou otimizações essenciais.\n" +
     "- Ignorar completamente estilo, formatação, nomes de variáveis ou outras questões menores.\n" +
-    "- Se encontrar problemas críticos, liste-os objetivamente usando pontos de bala.\n" +
-    "- Se NENHUM problema crítico for encontrado, responda EXATAMENTE com: 'Tudo certo, parabéns!'\n" +
+    "- Ignorar arquivos gerados automaticamente pelo Flutter (ex: arquivos `.g.dart`, `.freezed.dart`).\n" +
+    "- Ignorar arquivos de configuração padrão do projeto, como `pubspec.yaml` e `pubspec.lock`.\n" +
+    "- Se encontrar problemas críticos, resuma-os de forma curta e objetiva.\n" +
+    "- Se NENHUM problema crítico for encontrado, responda apenas com: 'Nenhum problema crítico encontrado.'\n" +
     "Aqui está o diff:"
+
+
 
 
 
@@ -17,7 +21,7 @@ export const geminiCompletionsConfig = {
     topK: 64,
     maxOutputTokens: 8192,
     responseMimeType: "text/plain",
-    model: "gemini-1.5-flash",
+    model: "gemini-2.0-flash-lite",
 }
 
 export const delay = (time: number) => {
