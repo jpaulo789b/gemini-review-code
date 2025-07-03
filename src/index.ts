@@ -1,7 +1,7 @@
 import {Command} from 'commander';
 import {GitLab} from './gitlab';
 import {Gemini} from './gemini';
-import {delay, getDiffBlocks, getLineObj} from "./utils";
+import {delay, getDiffBlocks, getLineObj, isValidReviewComment} from "./utils";
 
 const program = new Command();
 
@@ -46,7 +46,14 @@ async function run() {
                 if ((lineObj?.new_line && lineObj?.new_line > 0) || (lineObj.old_line && lineObj.old_line > 0)) {
                     try {
                         const suggestion = await aiClient.reviewCodeChange(item);
-                        await gitlab.addReviewComment(lineObj, change, suggestion);
+                        // Só adiciona comentário se há problemas críticos
+                        if (isValidReviewComment(suggestion)) {
+                            await gitlab.addReviewComment(lineObj, change, suggestion);
+                            console.log('✅ Comentário adicionado - problemas críticos encontrados');
+                        } else {
+                            console.log('ℹ️  Nenhum problema crítico encontrado - comentário não adicionado');
+                            console.log('📝 Resposta do Gemini:', suggestion.substring(0, 100) + '...');
+                        }
                     } catch (e: any) {
                         if (e?.response?.status === 429) {
                             console.log('Too Many Requests, try again');
