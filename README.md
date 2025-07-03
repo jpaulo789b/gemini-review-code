@@ -75,6 +75,40 @@ Review Automático:
     - merge_requests
   when: on_success
 ```
+
+### 🚨 **Controle de Pipeline**
+
+O sistema **automaticamente falha a pipeline** quando encontra problemas críticos:
+
+#### **Pipeline FALHA (exit code 1) quando encontra:**
+- 🚨 **Erros Grotescos** - Problemas que quebram a aplicação
+- ⚠️ **Erros Graves** - Violações arquiteturais críticas  
+- 🏗️ **Problemas de Build** - Configurações que quebram CI/CD
+
+#### **Pipeline PASSA com avisos (exit code 0) quando encontra:**
+- 🔍 **Lógicas Complexas** - Merecem atenção, mas não impedem merge
+
+#### **Pipeline PASSA completamente (exit code 0) quando:**
+- ✅ **Nenhum problema crítico** - Merge liberado
+
+### **Exemplo de Saída da Pipeline:**
+
+```bash
+=== RELATÓRIO FINAL DE REVISÃO ===
+📊 Total de problemas críticos encontrados: 3
+🚨 Erros grotescos: 2
+⚠️  Erros graves: 1
+🔍 Lógicas complexas: 0
+🏗️  Problemas de build: 0
+
+❌ PIPELINE FALHOU!
+🚨 Foram encontrados problemas críticos que impedem o merge:
+   • 2 erro(s) grotesco(s) que podem quebrar a aplicação
+   • 1 erro(s) grave(s) que violam padrões arquiteturais
+
+🔧 Corrija os problemas antes de fazer o merge.
+💡 Lógicas complexas não impedem o merge, mas merecem atenção.
+```
 ## � O Que Analisa
 
 ### ✅ **Detecta e Comenta:**

@@ -360,6 +360,27 @@ export const getCommentType = (geminiResponse: string): string => {
     return 'GERAL';
 }
 
+export const shouldFailPipeline = (commentType: string): boolean => {
+    // Tipos de erro que devem falhar a pipeline
+    const criticalTypes = [
+        'ERRO GROTESCO',
+        'ERRO GRAVE', 
+        'PROBLEMA CRÍTICO DE BUILD',
+        'PROBLEMA GRAVE DE CONFIGURAÇÃO'
+    ];
+    
+    return criticalTypes.includes(commentType);
+}
+
+export const isWarningOnly = (commentType: string): boolean => {
+    // Tipos que são apenas avisos (não falham a pipeline)
+    const warningTypes = [
+        'LÓGICA COMPLEXA'
+    ];
+    
+    return warningTypes.includes(commentType);
+}
+
 export const shouldIgnoreFile = (filePath: string): boolean => {
     if (!filePath) return true;
     

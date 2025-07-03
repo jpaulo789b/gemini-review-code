@@ -1,7 +1,7 @@
 import {Command} from 'commander';
 import {GitLab} from './gitlab';
 import {Gemini} from './gemini';
-import {delay, getDiffBlocks, getLineObj, isValidReviewComment, getCommentType, shouldIgnoreFile, isPlatformFile} from "./utils";
+import {delay, getDiffBlocks, getLineObj, isValidReviewComment, getCommentType, shouldIgnoreFile, isPlatformFile, shouldFailPipeline, isWarningOnly} from "./utils";
 
 const program = new Command();
 
@@ -32,6 +32,14 @@ async function run() {
     const changes = await gitlab.getMergeRequestChanges().catch(() => {
         console.log('get merge request changes error')
     });
+    
+    // Contadores para problemas críticos
+    let criticalIssuesCount = 0;
+    let grossErrorsCount = 0;
+    let severeErrorsCount = 0;
+    let complexLogicCount = 0;
+    let buildProblemsCount = 0;
+    
     for (const change of changes) {
         // Verificar se o arquivo deve ser ignorado completamente
         if (shouldIgnoreFile(change.new_path) || shouldIgnoreFile(change.old_path)) {
@@ -67,6 +75,20 @@ async function run() {
                         if (isValidReviewComment(suggestion, isPlatform)) {
                             const commentType = getCommentType(suggestion);
                             await gitlab.addReviewComment(lineObj, change, suggestion);
+                            
+                            // Incrementar contadores baseado no tipo do problema
+                            criticalIssuesCount++;
+                            
+                            if (commentType === 'ERRO GROTESCO') {
+                                grossErrorsCount++;
+                            } else if (commentType === 'ERRO GRAVE') {
+                                severeErrorsCount++;
+                            } else if (commentType === 'LÓGICA COMPLEXA') {
+                                complexLogicCount++;
+                            } else if (commentType === 'PROBLEMA CRÍTICO DE BUILD' || commentType === 'PROBLEMA GRAVE DE CONFIGURAÇÃO') {
+                                buildProblemsCount++;
+                            }
+                            
                             console.log(`✅ Comentário adicionado - ${commentType} encontrado (${fileType})`);
                             console.log(`📄 Arquivo: ${change.new_path || change.old_path}`);
                         } else {
@@ -84,7 +106,51 @@ async function run() {
             }
         }
     }
-    console.log('done');
+    
+    // Relatório final e decisão da pipeline
+    console.log('\n=== RELATÓRIO FINAL DE REVISÃO ===');
+    console.log(`📊 Total de problemas críticos encontrados: ${criticalIssuesCount}`);
+    console.log(`🚨 Erros grotescos: ${grossErrorsCount}`);
+    console.log(`⚠️  Erros graves: ${severeErrorsCount}`);
+    console.log(`🔍 Lógicas complexas: ${complexLogicCount}`);
+    console.log(`🏗️  Problemas de build: ${buildProblemsCount}`);
+    
+    // Determinar se a pipeline deve falhar
+    const shouldFailPipeline = grossErrorsCount > 0 || severeErrorsCount > 0 || buildProblemsCount > 0;
+    
+    if (shouldFailPipeline) {
+        console.log('\n❌ PIPELINE FALHOU!');
+        console.log('🚨 Foram encontrados problemas críticos que impedem o merge:');
+        
+        if (grossErrorsCount > 0) {
+            console.log(`   • ${grossErrorsCount} erro(s) grotesco(s) que podem quebrar a aplicação`);
+        }
+        if (severeErrorsCount > 0) {
+            console.log(`   • ${severeErrorsCount} erro(s) grave(s) que violam padrões arquiteturais`);
+        }
+        if (buildProblemsCount > 0) {
+            console.log(`   • ${buildProblemsCount} problema(s) de build que podem quebrar a CI/CD`);
+        }
+        
+        console.log('\n🔧 Corrija os problemas antes de fazer o merge.');
+        console.log('💡 Lógicas complexas não impedem o merge, mas merecem atenção.');
+        
+        // Falhar a pipeline com exit code 1
+        process.exit(1);
+    } else if (complexLogicCount > 0) {
+        console.log('\n⚠️  PIPELINE PASSOU COM AVISOS');
+        console.log(`🔍 Foram encontradas ${complexLogicCount} lógica(s) complexa(s) que merecem atenção, mas não impedem o merge.`);
+        console.log('💡 Considere refatorar essas lógicas para melhorar a manutenibilidade.');
+        
+        // Pipeline passa, mas com aviso
+        process.exit(0);
+    } else {
+        console.log('\n✅ PIPELINE PASSOU!');
+        console.log('🎉 Nenhum problema crítico encontrado. Merge liberado!');
+        
+        // Pipeline passa com sucesso
+        process.exit(0);
+    }
 }
 
 module.exports = run;
