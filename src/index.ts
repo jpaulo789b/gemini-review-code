@@ -1,7 +1,7 @@
 import {Command} from 'commander';
 import {GitLab} from './gitlab';
 import {Gemini} from './gemini';
-import {delay, getDiffBlocks, getLineObj, isValidReviewComment} from "./utils";
+import {delay, getDiffBlocks, getLineObj, isValidReviewComment, getCommentType} from "./utils";
 
 const program = new Command();
 
@@ -48,8 +48,10 @@ async function run() {
                         const suggestion = await aiClient.reviewCodeChange(item);
                         // Só adiciona comentário se há problemas críticos
                         if (isValidReviewComment(suggestion)) {
+                            const commentType = getCommentType(suggestion);
                             await gitlab.addReviewComment(lineObj, change, suggestion);
-                            console.log('✅ Comentário adicionado - problemas críticos encontrados');
+                            console.log(`✅ Comentário adicionado - ${commentType} encontrado`);
+                            console.log(`📄 Arquivo: ${change.new_path || change.old_path}`);
                         } else {
                             console.log('ℹ️  Nenhum problema crítico encontrado - comentário não adicionado');
                             console.log('📝 Resposta do Gemini:', suggestion.substring(0, 100) + '...');

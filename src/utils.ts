@@ -17,6 +17,19 @@ export const geminiSuggestContent = "Analise o seguinte diff de código Flutter/
     "- ServiceStatus não implementado para estados de loading/erro\n" +
     "- Uso de widgets nativos ao invés do design system DS*\n" +
     "- NavigatorController ignorado para navegação\n\n" +
+    "🔍 LÓGICAS COMPLEXAS E FORA DOS PADRÕES (Merecem atenção):\n" +
+    "- Métodos com mais de 50 linhas ou complexidade ciclomática alta\n" +
+    "- Aninhamento excessivo de condicionais (mais de 4 níveis)\n" +
+    "- Loops complexos com múltiplas condições de saída\n" +
+    "- Lógicas de negócio hardcoded sem abstração\n" +
+    "- Funções com mais de 7 parâmetros\n" +
+    "- Uso de magic numbers ou strings sem constantes\n" +
+    "- Lógica repetitiva que deveria ser extraída em métodos\n" +
+    "- Padrões anti-arquiteturais (God classes, Feature Envy, etc.)\n" +
+    "- Uso inadequado de design patterns\n" +
+    "- Violação do princípio da responsabilidade única\n" +
+    "- Acoplamento excessivo entre classes\n" +
+    "- Lógica de UI misturada com lógica de negócio\n\n" +
     "IGNORE COMPLETAMENTE:\n" +
     "- Arquivos .g.dart, .freezed.dart, pubspec.yaml, pubspec.lock\n" +
     "- Formatação, espaços, quebras de linha\n" +
@@ -26,9 +39,9 @@ export const geminiSuggestContent = "Analise o seguinte diff de código Flutter/
     "- Alterações em strings/textos\n" +
     "- Mudanças de tradução/localização\n\n" +
     "FORMATO DA RESPOSTA:\n" +
-    "Se encontrar problemas críticos: Liste por arquivo com '🚨 ERROS GROTESCOS:' e/ou '⚠️ ERROS GRAVES:'\n" +
+    "Se encontrar problemas: Liste por arquivo com '🚨 ERROS GROTESCOS:', '⚠️ ERROS GRAVES:' e/ou '🔍 LÓGICAS COMPLEXAS:'\n" +
     "Se NENHUM problema crítico: Responda EXATAMENTE: 'Nenhum problema crítico encontrado.'\n\n" +
-    "IMPORTANTE: Apenas comente se há problemas que realmente quebram a aplicação ou violam padrões arquiteturais essenciais.\n\n" +
+    "IMPORTANTE: Apenas comente se há problemas que realmente quebram a aplicação, violam padrões arquiteturais essenciais ou apresentam lógicas excessivamente complexas que prejudicam a manutenibilidade.\n\n" +
     "Aqui está o diff:"
 
 export const geminiCompletionsConfig = {
@@ -88,16 +101,27 @@ export const hasCriticalIssues = (geminiResponse: string): boolean => {
         return false;
     }
     
-    // Verifica se contém indicadores de problemas críticos
+    // Verifica se contém indicadores de problemas críticos, erros graves ou lógicas complexas
     const criticalIssuesPatterns = [
         '🚨 erros grotescos',
         '⚠️ erros graves',
-        '🚨',
+        '� lógicas complexas',
+        '�🚨',
         '⚠️',
+        '🔍',
         'erros grotescos',
         'erros graves',
+        'lógicas complexas',
         'problema crítico',
-        'problemas críticos'
+        'problemas críticos',
+        'complexidade alta',
+        'complexidade ciclomática',
+        'aninhamento excessivo',
+        'lógica complexa',
+        'padrão anti-arquitetural',
+        'violação do princípio',
+        'acoplamento excessivo',
+        'responsabilidade única'
     ];
     
     // Se contém algum indicador de problema crítico, retorna true
@@ -130,4 +154,50 @@ export const isValidReviewComment = (geminiResponse: string): boolean => {
     );
     
     return !hasGenericContent;
+}
+
+export const hasComplexLogic = (geminiResponse: string): boolean => {
+    const normalizedResponse = geminiResponse.trim().toLowerCase();
+    
+    // Padrões específicos para lógicas complexas
+    const complexLogicPatterns = [
+        '🔍 lógicas complexas',
+        'complexidade ciclomática',
+        'aninhamento excessivo',
+        'mais de 50 linhas',
+        'mais de 4 níveis',
+        'loops complexos',
+        'múltiplas condições',
+        'lógica hardcoded',
+        'mais de 7 parâmetros',
+        'magic numbers',
+        'magic strings',
+        'lógica repetitiva',
+        'god class',
+        'feature envy',
+        'design pattern inadequado',
+        'responsabilidade única',
+        'acoplamento excessivo',
+        'lógica de ui misturada'
+    ];
+    
+    return complexLogicPatterns.some(pattern => normalizedResponse.includes(pattern));
+}
+
+export const getCommentType = (geminiResponse: string): string => {
+    const normalizedResponse = geminiResponse.trim().toLowerCase();
+    
+    if (normalizedResponse.includes('🚨') || normalizedResponse.includes('erros grotescos')) {
+        return 'ERRO GROTESCO';
+    }
+    
+    if (normalizedResponse.includes('⚠️') || normalizedResponse.includes('erros graves')) {
+        return 'ERRO GRAVE';
+    }
+    
+    if (normalizedResponse.includes('🔍') || hasComplexLogic(geminiResponse)) {
+        return 'LÓGICA COMPLEXA';
+    }
+    
+    return 'GERAL';
 }
