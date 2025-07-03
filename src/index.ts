@@ -1,7 +1,7 @@
 import {Command} from 'commander';
 import {GitLab} from './gitlab';
 import {Gemini} from './gemini';
-import {delay, getDiffBlocks, getLineObj, isValidReviewComment, getCommentType} from "./utils";
+import {delay, getDiffBlocks, getLineObj, isValidReviewComment, getCommentType, shouldIgnoreFile, isPlatformFile} from "./utils";
 
 const program = new Command();
 
@@ -33,9 +33,22 @@ async function run() {
         console.log('get merge request changes error')
     });
     for (const change of changes) {
+        // Verificar se o arquivo deve ser ignorado completamente
+        if (shouldIgnoreFile(change.new_path) || shouldIgnoreFile(change.old_path)) {
+            console.log(`🚫 Ignorando arquivo: ${change.new_path || change.old_path} (arquivo não relevante)`);
+            continue;
+        }
+        
         if (change.renamed_file || change.deleted_file || !change?.diff?.startsWith('@@')) {
             continue;
         }
+        
+        // Verificar se é arquivo de plataforma
+        const isPlatform = isPlatformFile(change.new_path) || isPlatformFile(change.old_path);
+        const fileType = isPlatform ? 'PLATAFORMA' : 'DART';
+        
+        console.log(`🔍 Analisando arquivo ${fileType}: ${change.new_path || change.old_path}`);
+        
         const diffBlocks = getDiffBlocks(change?.diff);
         while (!!diffBlocks.length) {
             const item = diffBlocks.shift()!;
@@ -45,15 +58,19 @@ async function run() {
                 const lineObj = getLineObj(matches, item);
                 if ((lineObj?.new_line && lineObj?.new_line > 0) || (lineObj.old_line && lineObj.old_line > 0)) {
                     try {
-                        const suggestion = await aiClient.reviewCodeChange(item);
+                        // Usar método específico baseado no tipo de arquivo
+                        const suggestion = isPlatform 
+                            ? await aiClient.reviewPlatformChange(item)
+                            : await aiClient.reviewCodeChange(item);
+                        
                         // Só adiciona comentário se há problemas críticos
-                        if (isValidReviewComment(suggestion)) {
+                        if (isValidReviewComment(suggestion, isPlatform)) {
                             const commentType = getCommentType(suggestion);
                             await gitlab.addReviewComment(lineObj, change, suggestion);
-                            console.log(`✅ Comentário adicionado - ${commentType} encontrado`);
+                            console.log(`✅ Comentário adicionado - ${commentType} encontrado (${fileType})`);
                             console.log(`📄 Arquivo: ${change.new_path || change.old_path}`);
                         } else {
-                            console.log('ℹ️  Nenhum problema crítico encontrado - comentário não adicionado');
+                            console.log(`ℹ️  Nenhum problema crítico encontrado - comentário não adicionado (${fileType})`);
                             console.log('📝 Resposta do Gemini:', suggestion.substring(0, 100) + '...');
                         }
                     } catch (e: any) {

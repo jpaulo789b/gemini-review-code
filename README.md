@@ -1,158 +1,205 @@
-# @jpaulo789b/gemini-review-code-br-br
+# @jpaulo789b/gemini-review-code-br
 
 [![npm version](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai.svg)](https://badge.fury.io/js/%40hataiit9x%2Freview-code-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Summary
+## 📋 Resumo
 
 ![](preview.png)
 
-`@jpaulo789b/gemini-review-code-br` It is a small tool used for code review in GitLab Merge Requests. It supports calling the GitLab API for private 
-deployment and uses the Gemini AI API to obtain review results. Please note that when using it, ensure compliance with company regulations. 😉
+**Revisor inteligente de código Flutter/Dart** que analisa Merge Requests no GitLab usando IA do Google Gemini. 
 
+Focado em identificar **apenas problemas críticos** que realmente importam:
+- 🚨 Erros que quebram a aplicação
+- ⚠️ Violações de padrões arquiteturais
+- 🔍 Lógicas complexas que prejudicam manutenibilidade
+- 🏗️ Problemas de configuração que quebram builds
 
-## Features
+**Elimina ruído** ignorando formatação, comentários e mudanças menores.
 
-- 🛠️ Support configuration GitLab API address
-- ⚙️ Support configuration Gemini API Key to implement load balancing of interface calls (multiple Keys are separated by commas)
-- 📦 Support configuration Gemini custom model ID
-- 📦 Support configuration GitLab Project ID
-- 📦 Support configuration GitLab Merge Request ID
-- 🚀 Support running in CI/CD
-- 🚦 Automatically wait and try again when the rate limit is exceeded
-- 💬 The review results are appended to the location of the corresponding code block in the form of comments
+## ✨ Funcionalidades
 
+- 🎯 **Análise inteligente**: Foca apenas em problemas críticos
+- 🏗️ **Detecção de build**: Identifica configurações que quebram CI/CD
+- � **Filtragem automática**: Ignora arquivos irrelevantes
+- � **Integração GitLab**: Comentários diretos no Merge Request
+- � **Rate limiting**: Controle automático de requisições
+- � **Multi-chaves**: Balanceamento de carga com múltiplas API keys
+- ⚙️ **Configurável**: Modelos customizáveis do Gemini
 
-## Install
+## 🚀 Instalação
 
-```sh
-npm i @jpaulo789b/gemini-review-code-br
-`````
-
-## Use
-
-### Use via shell script
-
-```shell
-Usage: gemini-review-code-br [options]
-Options:
-  -g, --gitlab-api-url <string>       GitLab API URL (default: " https://gitlab.com/api/v4")
-  -t, --gitlab-access-token <string>  GitLab Access Token
-  -a, --api-key <string>              Gemini API Key
-  -p, --project-id <number>           GitLab Project ID
-  -m, --merge-request-id <string>     GitLab Merge Request ID
-  -c, --custom-model <string>         Custom Model ID, (default: "gemini-1.5-flash")
-  -h, --help                          display help for command
+```bash
+npm install @jpaulo789b/gemini-review-code-br -g
 ```
 
-Example:
+## 📖 Como Usar
 
-```sh
-gemini-review-code-br -g https://gitlab.com/api/v4 -t glpat-xxxxxxx -a AIzaSyAYNxxxxxxx,AIzaSyAYNxxxxxxx -p 1 -c gpt-3.5-turbo 432288 -m 8
+### Via linha de comando
+
+```bash
+gemini-review-code-br \
+  -g https://gitlab.com/api/v4 \
+  -t glpat-xxxxxxx \
+  -a AIzaSyAYNxxxxxxx \
+  -p 123456 \
+  -m 42
 ```
 
-### Use in CI
+### Parâmetros
 
-Set the `GITLAB_TOKEN` and `API_KEY` variables in GitLab CI/CD, `.gitlab-ci.yml` is as follows:
+| Parâmetro | Descrição | Padrão |
+|-----------|-----------|---------|
+| `-g, --gitlab-api-url` | URL da API do GitLab | `https://gitlab.com/api/v4` |
+| `-t, --gitlab-access-token` | Token de acesso do GitLab | - |
+| `-a, --api-key` | Chave da API do Gemini (múltiplas separadas por vírgula) | - |
+| `-p, --project-id` | ID do projeto no GitLab | - |
+| `-m, --merge-request-id` | ID do Merge Request | - |
+| `-c, --custom-model` | Modelo personalizado do Gemini | `gemini-1.5-flash` |
 
-```yml
+### Integração com GitLab CI/CD
+
+Configure as variáveis `GITLAB_TOKEN` e `API_KEY` no GitLab CI/CD:
+
+```yaml
 stages:
-  - merge-request
+  - code-review
 
-Code Review:
-  stage: merge-request  
-  image: node:16
+Review Automático:
+  stage: code-review
+  image: node:18
   script:
-    - npm i @jpaulo789b/gemini-review-code-br -g
+    - npm install @jpaulo789b/gemini-review-code-br -g
     - gemini-review-code-br -t "$GITLAB_TOKEN" -a "$API_KEY" -p "$CI_MERGE_REQUEST_PROJECT_ID" -m "$CI_MERGE_REQUEST_IID"
   only:
     - merge_requests
   when: on_success
 ```
-# 🔧 Sistema de Review Aprimorado
+## � O Que Analisa
 
-## ✅ Implementação Concluída
+### ✅ **Detecta e Comenta:**
 
-O sistema agora detecta e comenta três tipos principais de problemas:
-
-### 🚨 **ERROS GROTESCOS** (Críticos - Quebram a aplicação)
-- Crashes/Exceptions não tratadas
+#### 🚨 **Erros Críticos** (Quebram a aplicação)
+- Null pointer exceptions e tipos nullable incorretos
+- Crashes e exceções não tratadas  
+- Problemas de threading (async/await mal implementados)
 - Memory leaks evidentes
-- Null pointer exceptions
-- Threading issues
-- State management quebrado
+- State management quebrado (MobX mal implementado)
 
-### ⚠️ **ERROS GRAVES** (Violam padrões arquiteturais)
-- Classes Controller sem padrão correto
-- Widgets sem prefixo DS
-- MobX mal implementado
-- Controllers não injetados
+#### ⚠️ **Violações Arquiteturais** (Padrões do projeto)
+- Controllers sem padrão `Controlador[Funcionalidade]`
+- Widgets sem prefixo DS do design system
+- Controllers não injetados via GetIt
 - Uso de widgets nativos em vez do design system
+- ServiceStatus não implementado para loading/erro
 
-### 🔍 **LÓGICAS COMPLEXAS** (Merecem atenção)
+#### 🔍 **Lógicas Complexas** (Prejudicam manutenibilidade)
 - Métodos com mais de 50 linhas
 - Aninhamento excessivo (mais de 4 níveis)
-- Loops complexos
-- Lógicas hardcoded
-- Funções com muitos parâmetros
-- Magic numbers/strings
-- Padrões anti-arquiteturais
+- Lógicas hardcoded sem abstração
+- Magic numbers e strings
 - Violação de princípios SOLID
-- Acoplamento excessivo
+- Acoplamento excessivo entre classes
 
-## 🎯 Comportamento do Sistema
+#### 🏗️ **Problemas de Build** (Quebram CI/CD)
+- Sintaxe inválida em arquivos de configuração
+- Dependências incompatíveis ou ausentes
+- Configurações de segurança comprometidas
+- Permissões excessivas desnecessárias
 
-### ✅ **Comentará quando encontrar:**
+### ❌ **Ignora Completamente:**
+- Formatação, espaços e quebras de linha
+- Comentários e documentação
+- Nomes de variáveis locais
+- Alterações em textos e traduções
+- Pequenos ajustes de configuração
+- Placeholders substituídos no build
+
+## � Arquivos Processados
+
+### 🔄 **Analisados (Código Dart)**
+- `lib/**/*.dart` - Controllers, Services, Models, Widgets
+
+### 🏗️ **Analisados (Configuração de Plataforma)**
+- `AndroidManifest.xml` - Configurações Android
+- `build.gradle` - Dependências e build Android
+- `Info.plist` - Configurações iOS
+- `pubspec.yaml` - Dependências Flutter
+
+### 🚫 **Ignorados Automaticamente**
+- `*.g.dart`, `*.freezed.dart` - Arquivos gerados
+- `*_test.dart`, `test/` - Arquivos de teste
+- Assets (imagens, fontes, etc.)
+- Documentação (README, CHANGELOG)
+- Configurações de IDE (.vscode, .idea)
+
+## 📊 Exemplo de Uso
+
+### 💬 **Comentários Gerados**
+
 ```
-🚨 ERROS GROTESCOS:
-- Null pointer exception na linha 15
-- Async/await mal implementado
+🚨 ERRO CRÍTICO:
+Null pointer exception detectado na linha 23. 
+O método getUserName() pode retornar null mas não está sendo tratado.
 
-⚠️ ERROS GRAVES:
-- Widget Button usado em vez de DSbotaoPadrao
-- Controller não injetado via GetIt
+⚠️ VIOLAÇÃO ARQUITETURAL:
+Widget Button sendo usado em vez de DSbotaoPadrao do design system.
+Isso quebra a consistência visual da aplicação.
 
-🔍 LÓGICAS COMPLEXAS:
-- Método com 75 linhas e complexidade ciclomática alta
-- Aninhamento excessivo de condicionais (6 níveis)
-- Lógica de negócio hardcoded sem abstração
+🔍 LÓGICA COMPLEXA:
+Método processUserData() com 87 linhas e aninhamento de 6 níveis.
+Considere extrair essa lógica em métodos menores.
+
+🏗️ PROBLEMA DE BUILD:
+Dependência flutter_bloc: ^8.0.0 incompatível com provider: ^5.0.0.
+Isso pode causar falhas na compilação.
 ```
 
-### ❌ **NÃO comentará quando:**
-```
-"Nenhum problema crítico encontrado."
-"Apenas mudança de formatação"
-"Alteração de texto simples"
-"Mudança de tradução"
-```
-
-## 📊 Logs Informativos
-
-O sistema agora mostra logs detalhados:
+### 🔇 **Situações Ignoradas**
 
 ```
-✅ Comentário adicionado - ERRO GROTESCO encontrado
+✅ Formatação de código ajustada
+✅ Comentário adicionado na linha 15
+✅ String de tradução alterada
+✅ Placeholder ${APP_NAME} em AndroidManifest.xml
+✅ Versão atualizada de 1.0.0 para 1.0.1
+```
+
+## 📈 Logs do Sistema
+
+```bash
+🔍 Analisando arquivo DART: lib/controllers/usuario_controller.dart
+✅ Comentário adicionado - ERRO CRÍTICO encontrado
 📄 Arquivo: lib/controllers/usuario_controller.dart
 
-✅ Comentário adicionado - LÓGICA COMPLEXA encontrado  
-📄 Arquivo: lib/widgets/formulario_widget.dart
-
+🔍 Analisando arquivo PLATAFORMA: android/app/src/main/AndroidManifest.xml
 ℹ️  Nenhum problema crítico encontrado - comentário não adicionado
-📝 Resposta do Gemini: Nenhum problema crítico encontrado...
+📝 Resposta: Nenhum problema crítico encontrado.
+
+🚫 Ignorando arquivo: lib/models/user.g.dart (arquivo gerado)
 ```
 
-## 🚀 Benefícios
+## 🎯 Benefícios
 
-1. **Reduz ruído**: Elimina comentários desnecessários
-2. **Foca no importante**: Prioriza problemas críticos
-3. **Melhora qualidade**: Identifica lógicas complexas
-4. **Facilita manutenção**: Detecta violações de padrões
-5. **Aumenta produtividade**: Evita reviews irrelevantes
+✅ **Reduz ruído** - Elimina 90% dos comentários desnecessários  
+✅ **Foca no essencial** - Apenas problemas que realmente importam  
+✅ **Acelera reviews** - Desenvolvedores focam no que é crítico  
+✅ **Melhora qualidade** - Detecta problemas complexos e padrões  
+✅ **Protege CI/CD** - Previne quebras de build antes do merge  
+✅ **Economiza tempo** - Automação inteligente do processo de review  
 
-O sistema está pronto para uso e irá comentar apenas quando realmente necessário! 🎉
+## 🤝 Contribuição
 
-## contribute
-Welcome to contribute code, ask questions and suggestions! 👏
+Contribuições são bem-vindas! Sinta-se à vontade para:
+- Reportar bugs
+- Sugerir melhorias  
+- Enviar pull requests
+- Compartilhar casos de uso
 
-## License
-This project is based on the MIT license. See the LICENSE file for details. 📜
+## 📄 Licença
+
+Este projeto está licenciado sob a MIT License. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+**Desenvolvido para projetos Flutter/Dart com foco em qualidade e produtividade** �
