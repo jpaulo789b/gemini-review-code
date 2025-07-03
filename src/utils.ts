@@ -7,7 +7,9 @@ export const geminiSuggestContent = "Analise o seguinte diff de código Flutter/
     "- Null pointer exceptions ou uso incorreto de nullable types\n" +
     "- Imports circulares ou dependências quebradas\n" +
     "- Threading issues (async/await, Future mal implementados)\n" +
-    "- State management quebrado (MobX observers mal implementados)\n\n" +
+    "- State management quebrado (MobX observers mal implementados)\n" +
+    "- Métodos que podem retornar null sendo usados como widgets sem verificação\n" +
+    "- Tipos de retorno incompatíveis que causarão runtime errors\n\n" +
     "⚠️ ERROS GRAVES (Violam padrões arquiteturais):\n" +
     "- Classes Controller sem padrão 'Controlador[Funcionalidade]'\n" +
     "- Widgets sem prefixo DS do design system (DSbotaoPadrao, DStextfield)\n" +
@@ -44,15 +46,21 @@ export const geminiSuggestContent = "Analise o seguinte diff de código Flutter/
     "- Alterações em strings/textos\n" +
     "- Mudanças de tradução/localização\n" +
     "- Problemas de configuração de permissões Android/iOS\n" +
-    "- Placeholders em arquivos de configuração\n\n" +
+    "- Placeholders em arquivos de configuração\n" +
+    "- MUDANÇAS DE VERSÃO (version, build number, etc.)\n" +
+    "- Questões de legibilidade ou estilo de código\n" +
+    "- Sugestões de estruturação que não causam erros\n" +
+    "- Recomendações de convenções de versionamento\n" +
+    "- Observações sobre numeração arbitrária de versões\n\n" +
     "FOCO APENAS EM:\n" +
     "- Arquivos .dart que contenham lógica de negócio\n" +
     "- Controllers, Services, Models, Widgets customizados\n" +
-    "- Implementações de padrões arquiteturais\n\n" +
+    "- Implementações de padrões arquiteturais\n" +
+    "- PROBLEMAS TÉCNICOS que podem causar crashes ou bugs\n\n" +
     "FORMATO DA RESPOSTA:\n" +
     "Se encontrar problemas: Liste por arquivo com '🚨 ERROS GROTESCOS:', '⚠️ ERROS GRAVES:' e/ou '🔍 LÓGICAS COMPLEXAS:'\n" +
     "Se NENHUM problema crítico: Responda EXATAMENTE: 'Nenhum problema crítico encontrado.'\n\n" +
-    "IMPORTANTE: Apenas comente se há problemas que realmente quebram a aplicação, violam padrões arquiteturais essenciais ou apresentam lógicas excessivamente complexas que prejudicam a manutenibilidade. NÃO comente sobre configurações de sistema, permissões, ou arquivos que não sejam código Dart.\n\n" +
+    "IMPORTANTE: Apenas comente se há problemas que realmente quebram a aplicação, violam padrões arquiteturais essenciais ou apresentam lógicas excessivamente complexas que prejudicam a manutenibilidade. NÃO comente sobre configurações de sistema, permissões, arquivos que não sejam código Dart, mudanças de versão, ou questões estéticas/legibilidade.\n\n" +
     "Aqui está o diff:"
 
 export const geminiCompletionsConfig = {
@@ -159,31 +167,63 @@ export const isValidReviewComment = (geminiResponse: string, isPlatformFile: boo
         return false;
     }
     
+    const normalizedResponse = geminiResponse.trim().toLowerCase();
+    
+    // Filtros específicos para comentários irrelevantes (mais restritivos)
+    const irrelevantPatterns = [
+        // Mudanças de versão (padrões mais específicos)
+        'número da versão foi alterada',
+        'versão foi alterada de',
+        'convenção de versionamento',
+        'esquema de versionamento',
+        'numeração arbitrária',
+        'build number foi alterado',
+        'version code foi alterado',
+        
+        // Questões estéticas/legibilidade (mais específicos)
+        'legibilidade foi reduzida',
+        'legibilidade ligeiramente reduzida',
+        'estrutura anterior para manter',
+        'comentário explicando a mudança',
+        'simplificação seria útil',
+        'manter a estrutura anterior',
+        
+        // Questões não críticas (mais específicos)
+        'embora isso não seja um bug',
+        'não é, em si, um bug',
+        'recomenda-se usar uma convenção',
+        'considere uma revisão da estrutura',
+        'seria útil adicionar',
+        'potencialmente problemático, mas',
+        
+        // Formatação e estilo (mais específicos)
+        'sem alterações significativas',
+        'apenas formatação foi alterada',
+        'mudança de texto simples',
+        'alteração de string apenas',
+        'atualização de texto apenas'
+    ];
+    
+    // Se contém padrões irrelevantes, rejeitar
+    if (irrelevantPatterns.some(pattern => normalizedResponse.includes(pattern))) {
+        return false;
+    }
+    
     // Para arquivos de plataforma, permitir conteúdo de configuração se for crítico
     if (!isPlatformFile && isConfigurationContent(geminiResponse)) {
         return false;
     }
     
-    // Verifica se a resposta não contém apenas texto genérico
-    const genericPatterns = [
-        'sem alterações',
-        'apenas formatação',
-        'mudança de texto',
-        'alteração de string',
-        'atualização de texto'
-    ];
-    
     // Para arquivos de plataforma, padrões genéricos são diferentes
     if (isPlatformFile) {
         const platformGenericPatterns = [
-            'pequenos ajustes',
-            'mudanças de versão',
+            'pequenos ajustes de configuração',
+            'mudanças de versão que não quebram',
             'placeholders que serão substituídos',
-            'apenas comentários',
-            'formatação'
+            'apenas comentários foram',
+            'formatação foi alterada'
         ];
         
-        const normalizedResponse = geminiResponse.trim().toLowerCase();
         const hasGenericContent = platformGenericPatterns.some(pattern => 
             normalizedResponse.includes(pattern)
         );
@@ -191,12 +231,79 @@ export const isValidReviewComment = (geminiResponse: string, isPlatformFile: boo
         return !hasGenericContent;
     }
     
-    const normalizedResponse = geminiResponse.trim().toLowerCase();
-    const hasGenericContent = genericPatterns.some(pattern => 
+    // Para código Dart, verificar se menciona problemas técnicos reais
+    const technicalProblemPatterns = [
+        // Problemas de runtime
+        'null pointer',
+        'runtime error',
+        'crash',
+        'exception',
+        'pode causar',
+        'causando',
+        'quebrar',
+        'falha',
+        
+        // Problemas de tipo e retorno
+        'não retorna',
+        'tipo incorreto',
+        'tipo de retorno',
+        'retornando',
+        'definido como',
+        'mas pode retornar',
+        'sem verificação',
+        
+        // Problemas de widget e UI
+        'widget',
+        'ui',
+        'interface',
+        'renderização',
+        
+        // Problemas de concorrência
+        'memory leak',
+        'threading',
+        'async/await',
+        'future',
+        'await',
+        'implementado incorretamente',
+        
+        // Problemas arquiteturais
+        'state management',
+        'dependency injection',
+        'mobx',
+        'getit',
+        'controller',
+        'observer',
+        'injectable',
+        'padrão arquitetural',
+        'violando',
+        'não injetado',
+        
+        // Problemas de complexidade
+        'complexidade',
+        'ciclomática',
+        'aninhamento',
+        'múltiplas condições',
+        'mais de',
+        'linhas',
+        'níveis',
+        'manutenção',
+        'dificultando',
+        
+        // Problemas de build
+        'build',
+        'compilação',
+        'dependência',
+        'incompatível',
+        'quebrar o build',
+        'sintaxe inválida'
+    ];
+    
+    // Deve conter pelo menos um padrão técnico para ser válido
+    const hasTechnicalContent = technicalProblemPatterns.some(pattern => 
         normalizedResponse.includes(pattern)
     );
     
-    return !hasGenericContent;
+    return hasTechnicalContent;
 }
 
 export const hasComplexLogic = (geminiResponse: string): boolean => {
